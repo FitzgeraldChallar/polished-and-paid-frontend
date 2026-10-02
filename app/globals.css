@@ -1,26 +1,893 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Sacramento&display=swap");
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --cream: #fff9f6;
+  --cream-deep: #f8eee9;
+  --blush: #f6dfe1;
+  --blush-soft: #fbecee;
+  --rose: #d98d98;
+  --rose-dark: #b86676;
+  --rose-deep: #9f5261;
+  --charcoal: #1c1819;
+  --muted: #766b6b;
+  --gold: #bd9961;
+  --white: #ffffff;
+  --line: #eadfdb;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+* {
+  box-sizing: border-box;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  background: var(--cream);
+  color: var(--charcoal);
+  font-family: "DM Sans", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+::selection {
+  background: var(--blush);
+  color: var(--charcoal);
+}
+
+/* --------------------------------------------------
+   TYPOGRAPHY
+-------------------------------------------------- */
+
+.font-display {
+  font-family: "Playfair Display", serif;
+}
+
+.font-script {
+  font-family: "Sacramento", cursive;
+}
+
+.eyebrow {
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* --------------------------------------------------
+   LAYOUT
+-------------------------------------------------- */
+
+.container-store {
+  width: min(1400px, calc(100% - 48px));
+  margin-inline: auto;
+}
+
+@media (max-width: 768px) {
+  .container-store {
+    width: min(100% - 32px, 1400px);
+  }
+}
+
+.section-space {
+  padding-block: 88px;
+}
+
+@media (max-width: 768px) {
+  .section-space {
+    padding-block: 60px;
+  }
+}
+
+/* --------------------------------------------------
+   SHADOWS
+-------------------------------------------------- */
+
+.luxury-shadow {
+  box-shadow: 0 20px 60px rgba(67, 36, 39, 0.08);
+}
+
+.soft-shadow {
+  box-shadow: 0 10px 35px rgba(67, 36, 39, 0.07);
+}
+
+/* --------------------------------------------------
+   EDITORIAL ELEMENTS
+-------------------------------------------------- */
+
+.editorial-rule {
+  height: 1px;
+  width: 72px;
+  background: var(--charcoal);
+  opacity: 0.25;
+}
+
+.hero-gradient {
+  background:
+    linear-gradient(
+      90deg,
+      rgba(255, 249, 246, 0.98) 0%,
+      rgba(255, 249, 246, 0.88) 32%,
+      rgba(255, 249, 246, 0.18) 62%,
+      rgba(255, 249, 246, 0.02) 100%
+    );
+}
+
+@media (max-width: 768px) {
+  .hero-gradient {
+    background:
+      linear-gradient(
+        180deg,
+        rgba(255, 249, 246, 0.94) 0%,
+        rgba(255, 249, 246, 0.62) 45%,
+        rgba(255, 249, 246, 0.08) 100%
+      );
+  }
+}
+
+/* --------------------------------------------------
+   MARQUEE
+-------------------------------------------------- */
+
+.marquee {
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.marquee-track {
+  display: inline-flex;
+  min-width: max-content;
+  animation: marquee 28s linear infinite;
+}
+
+@keyframes marquee {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* --------------------------------------------------
+   IMAGE EFFECTS
+-------------------------------------------------- */
+
+.image-zoom {
+  transition:
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 500ms ease;
+}
+
+.group:hover .image-zoom {
+  transform: scale(1.055);
+}
+
+.category-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 3px;
+  aspect-ratio: 0.86;
+}
+
+.category-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(0, 0, 0, 0.02) 20%,
+      rgba(0, 0, 0, 0.58) 100%
+    );
+  pointer-events: none;
+}
+
+.product-card-image {
+  background: #f4ebe8;
+  overflow: hidden;
+}
+
+.product-card-image img {
+  transition:
+    transform 650ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 350ms ease;
+}
+
+.product-card:hover .product-card-image img {
+  transform: scale(1.06);
+}
+
+/* --------------------------------------------------
+   GLASS / PILLS
+-------------------------------------------------- */
+
+.pill {
+  border: 1px solid rgba(28, 24, 25, 0.12);
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(12px);
+}
+
+/* --------------------------------------------------
+   SCROLLING
+-------------------------------------------------- */
+
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-fade {
+  mask-image:
+    linear-gradient(
+      to right,
+      transparent,
+      black 5%,
+      black 95%,
+      transparent
+    );
+}
+
+/* --------------------------------------------------
+   POLISH & PAY BUTTON SYSTEM
+-------------------------------------------------- */
+
+.store-button-dark {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+
+  min-height: 52px;
+
+  padding: 16px 24px !important;
+
+  background-color: #1c1819 !important;
+  color: #ffffff !important;
+
+  border: 1px solid #1c1819 !important;
+
+  font-family: "DM Sans", sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+
+  transition:
+    background-color 250ms ease,
+    border-color 250ms ease,
+    color 250ms ease,
+    transform 250ms ease !important;
+}
+
+.store-button-dark span,
+.store-button-dark svg {
+  color: #ffffff !important;
+  fill: none;
+}
+
+.store-button-dark:hover {
+  background-color: #b86676 !important;
+  border-color: #b86676 !important;
+  color: #ffffff !important;
+  transform: translateY(-1px);
+}
+
+.store-button-dark:hover span,
+.store-button-dark:hover svg {
+  color: #ffffff !important;
+}
+
+.store-button-light {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+
+  min-height: 52px;
+
+  padding: 16px 24px !important;
+
+  background-color: #ffffff !important;
+  color: #1c1819 !important;
+
+  border: 1px solid rgba(28, 24, 25, 0.12) !important;
+
+  font-family: "DM Sans", sans-serif !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  line-height: 1 !important;
+  letter-spacing: 0.14em !important;
+  text-transform: uppercase !important;
+
+  transition:
+    background-color 250ms ease,
+    border-color 250ms ease,
+    color 250ms ease,
+    transform 250ms ease !important;
+}
+
+.store-button-light span,
+.store-button-light svg {
+  color: #1c1819 !important;
+}
+
+.store-button-light:hover {
+  background-color: #f6dfe1 !important;
+  border-color: #d98d98 !important;
+  color: #1c1819 !important;
+  transform: translateY(-1px);
+}
+
+/* --------------------------------------------------
+   MOBILE
+-------------------------------------------------- */
+
+@media (max-width: 640px) {
+  .mobile-hide {
+    display: none !important;
+  }
+
+  .store-button-dark,
+  .store-button-light {
+    min-height: 50px;
+    padding: 15px 20px !important;
+  }
+}
+/* ================================================================
+   FINAL LUXURY POLISH & PAY VISUAL SYSTEM
+   Keeps the existing functionality and the announcement bar intact.
+================================================================ */
+:root {
+  --pp-black: #171214;
+  --pp-black-2: #241b20;
+  --pp-plum: #3a252d;
+  --pp-pink: #d8758c;
+  --pp-pink-bright: #ef9eaf;
+  --pp-pink-soft: #f3c8d0;
+  --pp-metal: #b8afb3;
+  --pp-silver: #ddd5d8;
+  --pp-gray: #70666b;
+  --pp-surface: #f3ecef;
+  --pp-surface-2: #e8dde2;
+  --pp-glow: rgba(232, 126, 151, 0.34);
+}
+
+body {
+  background:
+    radial-gradient(circle at 8% 0%, rgba(240, 155, 177, 0.12), transparent 30%),
+    radial-gradient(circle at 92% 10%, rgba(185, 175, 182, 0.16), transparent 26%),
+    #f4eef1;
+}
+
+/* HEADER — the black announcement strip above it is deliberately untouched. */
+.pp-header {
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.96), rgba(246,239,242,.96)) !important;
+  border-bottom: 1px solid rgba(86, 63, 70, .16) !important;
+  box-shadow:
+    0 12px 34px rgba(42, 25, 31, .10),
+    0 1px 0 rgba(255,255,255,.9) inset !important;
+}
+
+.pp-header-inner {
+  min-height: 86px !important;
+}
+
+.pp-nav > a,
+.pp-nav-trigger {
+  color: #30262a !important;
+  text-shadow: 0 1px 0 rgba(255,255,255,.9);
+}
+
+.pp-nav > a:hover,
+.pp-nav-trigger:hover,
+.pp-nav-trigger.is-open {
+  color: var(--pp-pink) !important;
+}
+
+.pp-nav > a::after,
+.pp-nav-trigger::after {
+  background: linear-gradient(90deg, var(--pp-pink), #f2a4b4, var(--pp-pink)) !important;
+  box-shadow: 0 0 9px rgba(216,117,140,.38);
+}
+
+.pp-mega-inner,
+.pp-small-dropdown {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.98), rgba(242,232,236,.98)) !important;
+  border: 1px solid rgba(125, 91, 103, .18) !important;
+  box-shadow:
+    0 30px 80px rgba(39, 24, 30, .22),
+    0 0 0 1px rgba(255,255,255,.65) inset !important;
+}
+
+.pp-mega-inner::before {
+  background: linear-gradient(90deg, #a84f67, #f3a2b5, #b85d76, #f3a2b5, #a84f67) !important;
+  box-shadow: 0 0 16px rgba(232,126,151,.32);
+}
+
+.pp-mega-link:hover {
+  background: linear-gradient(90deg, #f4dce2, #fff1f4) !important;
+  color: #a94e67 !important;
+}
+
+.pp-small-dropdown-title,
+.pp-mega-eyebrow {
+  color: #ae5970 !important;
+}
+
+.pp-account-icon {
+  color: #9f4e65 !important;
+  background: linear-gradient(145deg, #fff, #f0d6dc) !important;
+  border-color: rgba(174, 89, 112, .28) !important;
+}
+
+.pp-cart-badge {
+  background: linear-gradient(145deg, #f09bad, #b94f6d) !important;
+  box-shadow: 0 0 14px rgba(220,105,133,.38) !important;
+}
+
+/* HERO — richer pink, graphite and metallic lighting without changing behavior. */
+.pp-hero {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255,255,255,.55), transparent 24%),
+    linear-gradient(125deg, #e9c2cb 0%, #d79aaa 43%, #62565d 100%) !important;
+  border-bottom: 1px solid rgba(65, 40, 48, .22) !important;
+  box-shadow: 0 20px 55px rgba(54, 30, 38, .14);
+}
+
+.pp-copy {
+  background:
+    radial-gradient(circle at 74% 35%, rgba(255,255,255,.9), transparent 28%),
+    linear-gradient(145deg, #f8e6ea 0%, #e9c5cf 52%, #c79aa6 100%) !important;
+}
+
+.pp-copy h1 {
+  text-shadow: 0 2px 18px rgba(70, 37, 48, .08);
+}
+
+.pp-eyebrow {
+  color: #9f4e65 !important;
+  text-shadow: 0 0 18px rgba(216,117,140,.25);
+}
+
+.pp-cta {
+  background: linear-gradient(135deg, #a94461, #dc718d 48%, #f1a1b2) !important;
+  border: 1px solid rgba(255,255,255,.35) !important;
+  box-shadow:
+    0 13px 34px rgba(126, 44, 66, .30),
+    0 0 24px rgba(230, 116, 145, .18) !important;
+}
+
+.pp-visual {
+  background: linear-gradient(135deg, #4b3c42, #b78291 50%, #6c6268) !important;
+}
+
+.pp-color-wash {
+  background:
+    radial-gradient(circle at 78% 25%, rgba(255,255,255,.24), transparent 23%),
+    linear-gradient(135deg, #7c5c68, #d28e9e 47%, #393238) !important;
+}
+
+.pp-slogan {
+  text-shadow:
+    0 2px 10px rgba(20, 12, 16, .36),
+    0 0 22px rgba(255, 182, 200, .22) !important;
+}
+
+.pp-hero-bottom {
+  background: linear-gradient(90deg, rgba(25,18,21,.92), rgba(64,44,51,.90), rgba(25,18,21,.92)) !important;
+  color: #f5dfe4 !important;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.pp-hero-bottom i {
+  background: #e995aa !important;
+  box-shadow: 0 0 9px rgba(233,149,170,.65);
+}
+
+/* Homepage cards and product surfaces. */
+.pp-products-section,
+.pp-editorial,
+.pp-story,
+.pp-trust {
+  position: relative;
+}
+
+.pp-products-section::before,
+.pp-editorial::before,
+.pp-story::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 7% 15%, rgba(226,128,153,.10), transparent 22%),
+    radial-gradient(circle at 94% 80%, rgba(145,133,141,.11), transparent 24%);
+}
+
+.pp-product-grid > *,
+.pp-editorial-image,
+.pp-story-frame,
+.category-card {
+  box-shadow:
+    0 18px 44px rgba(47, 30, 36, .10),
+    0 0 0 1px rgba(255,255,255,.72) inset;
+}
+
+.category-card {
+  border: 1px solid rgba(77, 52, 61, .14) !important;
+}
+
+.category-card::after {
+  background:
+    linear-gradient(180deg, rgba(35,20,27,.02) 10%, rgba(35,20,27,.68) 100%) !important;
+}
+
+.product-card-image {
+  background: linear-gradient(145deg, #e8dde1, #cdbfc5) !important;
+}
+
+.store-button-dark {
+  background: linear-gradient(135deg, #1b1518, #3b2830 55%, #21171c) !important;
+  border-color: rgba(239,158,175,.22) !important;
+  box-shadow: 0 11px 28px rgba(40,20,27,.18), 0 0 0 1px rgba(255,255,255,.06) inset;
+}
+
+.store-button-dark:hover {
+  background: linear-gradient(135deg, #a94562, #d97590, #f09daf) !important;
+  box-shadow: 0 14px 34px rgba(156,57,83,.28) !important;
+}
+
+.store-button-light {
+  background: linear-gradient(145deg, #fff, #eadfe3) !important;
+  border-color: rgba(91, 64, 73, .16) !important;
+  box-shadow: 0 10px 24px rgba(43,26,32,.08), inset 0 1px 0 rgba(255,255,255,.9);
+}
+
+/* Loading surfaces feel intentional rather than blank. */
+.pp-product-skeleton,
+.pp-empty-products,
+.pp-skeleton-image,
+.pp-skeleton-title,
+.pp-skeleton-price,
+.pp-skeleton-small {
+  background-image: linear-gradient(90deg, rgba(224,211,216,.55), rgba(248,238,242,.9), rgba(224,211,216,.55)) !important;
+  background-size: 200% 100%;
+  animation: ppShimmer 1.5s linear infinite;
+}
+
+@keyframes ppShimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* Account sign-in: deeper luxury treatment and clear validation states. */
+.account-auth {
+  background:
+    radial-gradient(circle at 15% 20%, rgba(239,157,177,.18), transparent 30%),
+    linear-gradient(135deg, #f4e6ea, #d9cbd1 58%, #f5edf0) !important;
+}
+
+.account-auth-art {
+  background:
+    radial-gradient(circle at 72% 20%, rgba(255,255,255,.28), transparent 22%),
+    linear-gradient(145deg, #38262d 0%, #6c4c58 52%, #bb788b 100%) !important;
+  color: #fff !important;
+}
+
+.account-auth-art > span {
+  color: #f4a4b7 !important;
+}
+
+.account-auth-art h1 {
+  color: #fff !important;
+  text-shadow: 0 5px 28px rgba(0,0,0,.24);
+}
+
+.account-auth-art h1 em {
+  color: #f1a0b3 !important;
+}
+
+.account-auth-art p {
+  color: #f0dce2 !important;
+}
+
+.account-auth-script {
+  color: #f7b3c2 !important;
+  text-shadow: 0 0 20px rgba(240,142,166,.26);
+}
+
+.account-auth-panel {
+  background:
+    linear-gradient(145deg, rgba(255,255,255,.94), rgba(239,229,233,.96)) !important;
+}
+
+.account-auth-card {
+  padding: 38px !important;
+  border: 1px solid rgba(102,72,82,.14) !important;
+  background: rgba(255,255,255,.72) !important;
+  box-shadow: 0 28px 75px rgba(54,32,40,.14), inset 0 1px 0 rgba(255,255,255,.9) !important;
+  backdrop-filter: blur(14px);
+}
+
+.account-auth-card h2 {
+  color: #23191d !important;
+}
+
+.account-field input {
+  height: 54px !important;
+  background: #eee7eb !important;
+  border: 1px solid rgba(99,72,82,.17) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.72);
+}
+
+.account-field input:focus {
+  background: #fff !important;
+  border-color: #d4778e !important;
+  box-shadow: 0 0 0 4px rgba(212,119,142,.13), 0 9px 25px rgba(89,42,55,.07) !important;
+}
+
+.account-submit {
+  background: linear-gradient(135deg, #24191e, #4b2d38 52%, #26181e) !important;
+  box-shadow: 0 13px 32px rgba(52,25,34,.18);
+}
+
+.account-submit:hover {
+  background: linear-gradient(135deg, #a74461, #d97590, #ee9daf) !important;
+}
+
+.account-error {
+  border: 1px solid rgba(175,77,92,.17) !important;
+  background: linear-gradient(135deg, #f8dfe3, #f4e8eb) !important;
+}
+
+/* Signed-in account hero. */
+.account-hero,
+.wishlist-hero,
+.cart-hero {
+  background:
+    radial-gradient(circle at 82% 15%, rgba(255,255,255,.36), transparent 22%),
+    linear-gradient(120deg, #4a323b, #9e6373 48%, #d995a7) !important;
+  color: #fff !important;
+  box-shadow: 0 20px 45px rgba(51,29,38,.13);
+}
+
+.account-hero h1,
+.wishlist-hero h1,
+.cart-hero h1 {
+  color: #fff !important;
+  text-shadow: 0 5px 25px rgba(33,18,24,.2);
+}
+
+.account-hero h1 em,
+.wishlist-hero h1 em,
+.cart-hero h1 em {
+  color: #f6afbe !important;
+}
+
+/* Admin — dark, glossy, unmistakably premium. */
+.pp-admin-app {
+  background:
+    radial-gradient(circle at 90% 0%, rgba(225,115,143,.10), transparent 24%),
+    #f0eaed !important;
+}
+
+.pp-admin-sidebar {
+  background:
+    linear-gradient(180deg, #120e11, #24171d 55%, #171114) !important;
+  box-shadow: 10px 0 35px rgba(19,10,14,.18);
+}
+
+.pp-admin-topbar {
+  background: linear-gradient(180deg, #fff, #f3edef) !important;
+  box-shadow: 0 10px 30px rgba(42,25,31,.06);
+}
+
+.pp-admin-sidebar button:hover,
+.pp-admin-sidebar button.active {
+  background: linear-gradient(90deg, rgba(211,112,138,.23), rgba(211,112,138,.06)) !important;
+}
+
+.pp-admin-sidebar button.active {
+  box-shadow: inset 3px 0 #e995aa, 0 0 22px rgba(216,117,140,.08) !important;
+}
+
+.pp-admin-brand {
+  border-bottom-color: rgba(255,255,255,.08) !important;
+}
+
+.pp-admin-main .panel,
+.pp-admin-main .stat,
+.pp-admin-main .category-card,
+.pp-admin-main .modal {
+  border-color: rgba(93,66,77,.14) !important;
+  box-shadow: 0 15px 42px rgba(45,27,35,.07), inset 0 1px 0 rgba(255,255,255,.75);
+}
+
+.pp-admin-main .primary {
+  background: linear-gradient(135deg, #20161a, #4b2b37 55%, #24171d) !important;
+  box-shadow: 0 9px 22px rgba(48,24,32,.16);
+}
+
+.pp-admin-main .primary:hover {
+  background: linear-gradient(135deg, #a74461, #d97590, #ef9daf) !important;
+}
+
+.pp-admin-main .stat-icon,
+.pp-admin-main .category-icon {
+  background: linear-gradient(145deg, #f5dce2, #dfbec8) !important;
+  color: #a64d66 !important;
+  box-shadow: 0 7px 18px rgba(99,48,63,.10);
+}
+
+/* Logo utility: the supplied transparent logo is used instead of text marks. */
+.pp-login-logo,
+.pp-admin-logo {
+  display: block;
+  width: 180px;
+  height: 86px;
+  object-fit: contain;
+  object-position: center;
+}
+
+/* Prevent horizontal jitter from long names and dropdown content. */
+.pp-header-inner,
+.pp-nav,
+.pp-actions,
+.pp-mega-columns,
+.pp-mega-inner {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .account-auth-card { padding: 28px !important; }
+  .pp-header-inner { min-height: 76px !important; }
+}
+
+@media (max-width: 620px) {
+  .account-auth-card { padding: 22px !important; }
+}
+
+.pp-admin-sidebar .pp-admin-logo { width: 150px; height: 72px; margin-left: -8px; }
+.pp-admin-brand { min-height: 78px; display:flex; flex-direction:column; justify-content:center; align-items:flex-start; gap:2px; }
+.pp-admin-brand > div span { color:#d6c4ca; font:600 9px/1 "DM Sans",sans-serif; letter-spacing:.14em; text-transform:uppercase; }
+@media(max-width:760px){ .pp-admin-sidebar .pp-admin-logo { width:145px; height:70px; } }
+
+.pp-drawer-logo { display:block; width:150px; height:64px; object-fit:contain; object-position:left center; margin-bottom:8px; filter:drop-shadow(0 7px 16px rgba(180,86,108,.16)); }
+
+/* =========================================================
+   FINAL STOREFRONT TYPOGRAPHY + ALIGNMENT PASS
+   Keeps existing functionality and luxury visual language.
+========================================================= */
+.storefront,
+.pp-homepage,
+.about-page,
+.account-page,
+.account-auth,
+.shop-page,
+.cart-page,
+.checkout-page,
+.product-page,
+.wishlist-page {
+  font-size: 15px;
+}
+
+/* Readable body/UI copy across the storefront. */
+.pp-homepage p,
+.pp-homepage li,
+.pp-homepage label,
+.pp-homepage input,
+.pp-homepage select,
+.pp-homepage textarea,
+.pp-homepage button,
+.pp-homepage a,
+.shop-page p,
+.shop-page label,
+.shop-page input,
+.shop-page select,
+.shop-page button,
+.product-page p,
+.product-page label,
+.product-page button,
+.cart-page p,
+.cart-page label,
+.cart-page button,
+.wishlist-page p,
+.wishlist-page button {
+  font-size: 14px;
+}
+
+/* Small uppercase labels remain intentionally compact, but are readable. */
+.pp-section-eyebrow,
+.pp-section-heading .pp-section-eyebrow,
+.eyebrow,
+.store-eyebrow,
+.product-card-badge,
+.product-card-meta,
+.pp-trust-item h3,
+.pp-admin-brand > div span {
+  font-size: 11px !important;
+}
+
+.pp-section-heading h2,
+.pp-story h2,
+.pp-editorial h2 {
+  letter-spacing: -0.045em;
+}
+
+.pp-trust-inner {
+  width: min(1280px, calc(100% - 72px));
+  margin-inline: auto;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.pp-trust-item {
+  min-width: 0;
+  justify-content: center;
+  text-align: center;
+  padding: 28px 24px;
+}
+
+.pp-trust-item > div:last-child {
+  min-width: 0;
+}
+
+.pp-trust-item h3 {
+  font-size: 12px !important;
+  letter-spacing: 0.09em;
+  margin-bottom: 7px;
+}
+
+.pp-trust-item p {
+  font-size: 13px !important;
+  line-height: 1.65;
+}
+
+.pp-trust-icon {
+  margin-inline: auto;
+}
+
+.store-button-dark,
+.store-button-light {
+  font-size: 11px !important;
+  letter-spacing: 0.13em !important;
+}
+
+@media (max-width: 900px) {
+  .pp-trust-inner { width: calc(100% - 48px); }
+  .pp-trust-item { padding: 24px 16px; }
+}
+
+@media (max-width: 760px) {
+  .pp-trust-inner { grid-template-columns: 1fr 1fr; width: 100%; }
+  .pp-trust-item { border-bottom: 1px solid rgba(255,255,255,.09); }
+  .pp-trust-item:nth-child(2) { border-right: 0; }
+  .pp-trust-item:nth-child(3),
+  .pp-trust-item:nth-child(4) { border-bottom: 0; }
 }
