@@ -105,23 +105,6 @@ Make sure you have the following installed on your machine:
 
 ---
 
-## 📂 Project Structure
-
-```text
-├── backend/                     # Django Project files
-│   ├── core/                    # Main settings config
-│   ├── products/                # Product models and API endpoints
-│   └── users/                   # Authentication & profile models
-├── imis-frontend/               # Next.js Application
-│   ├── src/
-│   │   ├── app/                 # Next.js App Router (pages)
-│   │   ├── components/          # Reusable UI elements
-│   │   └── context/             # Global application state
-├── .gitignore                   # Main gitignore blocking node_modules & caches
-└── README.md                    # Project documentation
-```
-
----
 
 ## 🔒 Security & Optimization
 
