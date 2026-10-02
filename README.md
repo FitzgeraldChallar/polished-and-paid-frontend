@@ -1,4 +1,4 @@
-# Polished and Paid Business - E-Commerce Platform
+# Polished and Paid - E-Commerce Platform (Frontend)
 
 Welcome to the official repository for the **Polished and Paid Business** e-commerce platform. This application features a decoupled architecture built with a high-performance **Django REST Framework** backend and a dynamic, responsive **Next.js** frontend.
 
