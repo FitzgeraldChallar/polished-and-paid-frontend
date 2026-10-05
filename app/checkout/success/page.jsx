@@ -1,3 +1,5 @@
+"use client";
+
 import Header from "../../../components/storefront/Header";
 import Footer from "../../../components/storefront/Footer";
 import { Check, ArrowRight, Sparkles } from "lucide-react";
