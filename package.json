@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "polished-and-paid",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,7 +11,7 @@
     "build:vinext": "vite build",
     "start:vinext": "vite preview",
     "deploy:vinext": "vinext-cloudflare deploy",
-    "deploy:response-store": "cf deploy --prebuilt --mode production"
+    "deploy:response-store": "cf deploy --prebuilt --mode production --worker frontend-response-store"
   },
   "dependencies": {
     "@cloudflare/workers-response-store": "^1.0.1",
