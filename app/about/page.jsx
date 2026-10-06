@@ -14,7 +14,7 @@ export default function AboutPage() {
           <div className={styles.heroGlow} />
           <div className={styles.heroInner}>
             <div className={styles.heroCopy}>
-              <span className={styles.kicker}>THE POLISH &amp; PAY STORY</span>
+              <span className={styles.kicker}>THE POLISHED &amp; PAID STORY</span>
               <h1>
                 Beauty should feel
                 <br />
@@ -68,7 +68,7 @@ export default function AboutPage() {
             </h2>
             <p>
               We believe the things you reach for every day deserve to feel
-              beautiful. Polish &amp; Pay brings together products that make
+              beautiful. Polished &amp; Paid brings together products that make
               getting ready, winding down and taking care of yourself feel
               considered rather than ordinary.
             </p>
@@ -86,7 +86,7 @@ export default function AboutPage() {
 
         <section className={styles.valuesSection}>
           <div className={styles.sectionIntro}>
-            <span className={styles.kicker}>WHY POLISH &amp; PAY</span>
+            <span className={styles.kicker}>WHY POLISHED &amp; PAID</span>
             <h2>Beautifully considered.</h2>
             <p>
               Everything begins with the feeling we want your shopping
