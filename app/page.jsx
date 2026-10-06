@@ -26,7 +26,6 @@ import {
   addToCart,
 } from "../lib/storeApi";
 
-
 /* =========================================================
    EMPTY PRODUCT STATE
 ========================================================= */
@@ -34,16 +33,12 @@ import {
 function EmptyProducts({ message }) {
   return (
     <div className="pp-empty-products">
-      <Sparkles
-        size={22}
-        strokeWidth={1.1}
-      />
+      <Sparkles size={22} strokeWidth={1.1} />
 
       <p>{message}</p>
     </div>
   );
 }
-
 
 /* =========================================================
    PRODUCT SKELETON
@@ -63,21 +58,14 @@ function ProductSkeleton() {
   );
 }
 
-
 /* =========================================================
    TRUST ITEM
 ========================================================= */
 
-function TrustItem({
-  icon,
-  title,
-  text,
-}) {
+function TrustItem({ icon, title, text }) {
   return (
     <div className="pp-trust-item">
-      <div className="pp-trust-icon">
-        {icon}
-      </div>
+      <div className="pp-trust-icon">{icon}</div>
 
       <div>
         <h3>{title}</h3>
@@ -88,42 +76,22 @@ function TrustItem({
   );
 }
 
-
 /* =========================================================
    HOMEPAGE
 ========================================================= */
 
 export default function HomePage() {
-  const [
-    newArrivals,
-    setNewArrivals,
-  ] = useState([]);
+  const [newArrivals, setNewArrivals] = useState([]);
 
-  const [
-    featuredProducts,
-    setFeaturedProducts,
-  ] = useState([]);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
 
-  const [
-    bestSellers,
-    setBestSellers,
-  ] = useState([]);
+  const [bestSellers, setBestSellers] = useState([]);
 
-  const [
-    selfCareProducts,
-    setSelfCareProducts,
-  ] = useState([]);
+  const [selfCareProducts, setSelfCareProducts] = useState([]);
 
-  const [
-    loading,
-    setLoading,
-  ] = useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const [
-    cartMessage,
-    setCartMessage,
-  ] = useState("");
-
+  const [cartMessage, setCartMessage] = useState("");
 
   /* =======================================================
      LOAD STOREFRONT DATA
@@ -182,9 +150,7 @@ export default function HomePage() {
               )
             : [];
 
-        setSelfCareProducts(
-          selfCare.slice(0, 4)
-        );
+        setSelfCareProducts(selfCare.slice(0, 4));
       } catch (error) {
         console.error(
           "Polish & Pay storefront error:",
@@ -204,17 +170,13 @@ export default function HomePage() {
     };
   }, []);
 
-
   /* =======================================================
      ADD TO CART
   ======================================================= */
 
   async function handleAddToCart(product) {
     try {
-      await addToCart(
-        product.id,
-        1
-      );
+      await addToCart(product.id, 1);
 
       setCartMessage(
         `${product.name} has been added to your bag.`
@@ -241,7 +203,6 @@ export default function HomePage() {
     }
   }
 
-
   return (
     <>
       <Header />
@@ -254,13 +215,11 @@ export default function HomePage() {
 
         <Hero />
 
-
         {/* =================================================
             CATEGORIES
         ================================================= */}
 
         <CategoryGrid />
-
 
         {/* =================================================
             NEW ARRIVALS
@@ -278,27 +237,19 @@ export default function HomePage() {
 
             {loading ? (
               <div className="pp-product-grid">
-                {[1, 2, 3, 4].map(
-                  (item) => (
-                    <ProductSkeleton
-                      key={item}
-                    />
-                  )
-                )}
+                {[1, 2, 3, 4].map((item) => (
+                  <ProductSkeleton key={item} />
+                ))}
               </div>
             ) : newArrivals.length ? (
               <div className="pp-product-grid">
-                {newArrivals.map(
-                  (product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onAddToCart={
-                        handleAddToCart
-                      }
-                    />
-                  )
-                )}
+                {newArrivals.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onAddToCart={handleAddToCart}
+                  />
+                ))}
               </div>
             ) : (
               <EmptyProducts
@@ -308,7 +259,6 @@ export default function HomePage() {
 
           </div>
         </section>
-
 
         {/* =================================================
             EDITORIAL FEATURE
@@ -372,7 +322,6 @@ export default function HomePage() {
           </div>
         </section>
 
-
         {/* =================================================
             FEATURED PRODUCTS
         ================================================= */}
@@ -389,17 +338,13 @@ export default function HomePage() {
 
             {featuredProducts.length ? (
               <div className="pp-product-grid">
-                {featuredProducts.map(
-                  (product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onAddToCart={
-                        handleAddToCart
-                      }
-                    />
-                  )
-                )}
+                {featuredProducts.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onAddToCart={handleAddToCart}
+                  />
+                ))}
               </div>
             ) : (
               <EmptyProducts
@@ -409,7 +354,6 @@ export default function HomePage() {
 
           </div>
         </section>
-
 
         {/* =================================================
             SELF CARE
@@ -456,41 +400,28 @@ export default function HomePage() {
 
             </div>
 
-            <div className="pp-selfcare-products">
+            {/* =================================================
+                SELF CARE IMAGE
+            ================================================= */}
 
-              {selfCareProducts.length ? (
-                selfCareProducts
-                  .slice(0, 2)
-                  .map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onAddToCart={
-                        handleAddToCart
-                      }
-                    />
-                  ))
-              ) : (
-                <div className="pp-selfcare-empty">
+            <div className="pp-selfcare-image">
+              <img
+                src="/images/self-care-banner.jpg"
+                alt="Self-care essentials"
+                loading="lazy"
+                decoding="async"
+                className="pp-selfcare-image-element"
+              />
 
-                  <Sparkles
-                    size={26}
-                    strokeWidth={1}
-                  />
-
-                  <p>
-                    Self-care products
-                    will appear here.
-                  </p>
-
-                </div>
-              )}
-
+              <div className="pp-selfcare-image-overlay">
+                <span>
+                  Take a moment.
+                </span>
+              </div>
             </div>
 
           </div>
         </section>
-
 
         {/* =================================================
             BEST SELLERS
@@ -508,17 +439,13 @@ export default function HomePage() {
 
             {bestSellers.length ? (
               <div className="pp-product-grid">
-                {bestSellers.map(
-                  (product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      onAddToCart={
-                        handleAddToCart
-                      }
-                    />
-                  )
-                )}
+                {bestSellers.map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    onAddToCart={handleAddToCart}
+                  />
+                ))}
               </div>
             ) : (
               <EmptyProducts
@@ -528,7 +455,6 @@ export default function HomePage() {
 
           </div>
         </section>
-
 
         {/* =================================================
             TRUST STRIP
@@ -585,7 +511,6 @@ export default function HomePage() {
           </div>
 
         </section>
-
 
         {/* =================================================
             BRAND STORY
@@ -656,7 +581,6 @@ export default function HomePage() {
 
       </main>
 
-
       {/* ===================================================
           CART TOAST
       =================================================== */}
@@ -681,9 +605,7 @@ export default function HomePage() {
         </div>
       )}
 
-
       <Footer />
-
 
       {/* ===================================================
           HOMEPAGE STYLES
@@ -1030,38 +952,62 @@ export default function HomePage() {
           color: #ffffff;
         }
 
-        .pp-selfcare-products {
-          display: grid;
-          grid-template-columns: repeat(
-            2,
-            minmax(0, 1fr)
-          );
-          gap: 24px;
+
+        /* =================================================
+           SELF CARE IMAGE
+        ================================================= */
+
+        .pp-selfcare-image {
+          position: relative;
+          width: 100%;
+          height: 430px;
+          overflow: hidden;
+          background: #ead7d2;
         }
 
-        .pp-selfcare-empty {
-          grid-column: 1 / -1;
-          min-height: 330px;
+        .pp-selfcare-image-element {
+          display: block;
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          object-position: center;
+          transition:
+            transform 800ms
+            cubic-bezier(
+              0.2,
+              0.65,
+              0.25,
+              1
+            );
+        }
+
+        .pp-selfcare-image:hover
+          .pp-selfcare-image-element {
+          transform: scale(1.025);
+        }
+
+        .pp-selfcare-image-overlay {
+          position: absolute;
+          inset: 22px;
           display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-direction: column;
-          gap: 12px;
-          background: rgba(
-            255,
-            255,
-            255,
-            0.3
-          );
-          color: #9a7a7d;
+          align-items: flex-end;
+          padding: 30px;
+          border: 1px solid
+            rgba(255, 255, 255, 0.65);
+          pointer-events: none;
+          z-index: 2;
         }
 
-        .pp-selfcare-empty p {
-          margin: 0;
+        .pp-selfcare-image-overlay span {
+          color: #ffffff;
           font-family:
-            "DM Sans",
-            sans-serif;
-          font-size: 11px;
+            "Sacramento",
+            cursive;
+          font-size: 48px;
+          line-height: 1;
+          text-shadow:
+            0 2px 18px
+              rgba(0, 0, 0, 0.18);
         }
 
 
@@ -1341,6 +1287,14 @@ export default function HomePage() {
           .pp-story-inner {
             min-height: 450px;
           }
+
+          .pp-selfcare-image {
+            min-height: 450px;
+          }
+
+          .pp-selfcare-image-element {
+            min-height: 450px;
+          }
         }
 
 
@@ -1385,11 +1339,12 @@ export default function HomePage() {
             margin-right: auto;
           }
 
-          .pp-selfcare-products {
-            grid-template-columns: repeat(
-              2,
-              minmax(0, 1fr)
-            );
+          .pp-selfcare-image {
+            min-height: 460px;
+          }
+
+          .pp-selfcare-image-element {
+            min-height: 460px;
           }
 
           .pp-trust-inner {
@@ -1460,8 +1415,21 @@ export default function HomePage() {
             padding: 65px 0;
           }
 
-          .pp-selfcare-products {
-            gap: 12px;
+          .pp-selfcare-image {
+            min-height: 380px;
+          }
+
+          .pp-selfcare-image-element {
+            min-height: 380px;
+          }
+
+          .pp-selfcare-image-overlay {
+            inset: 15px;
+            padding: 20px;
+          }
+
+          .pp-selfcare-image-overlay span {
+            font-size: 38px;
           }
 
           .pp-trust-inner {

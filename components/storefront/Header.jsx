@@ -409,6 +409,10 @@ export default function Header() {
               src="/images/polish-pay-logo.png"
               alt="Polish & Pay"
               className="pp-logo-image"
+              width={132}
+              height={66}
+              loading="eager"
+              decoding="async"
             />
           </Link>
 
@@ -1030,6 +1034,10 @@ export default function Header() {
                   src="/images/polish-pay-logo.png"
                   alt="Polish & Pay"
                   className="pp-logo-image"
+                  width={132}
+                  height={66}
+                  loading="eager"
+                  decoding="async"
                 />
               </Link>
 
