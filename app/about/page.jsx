@@ -27,7 +27,7 @@ export default function AboutPage() {
               </p>
               <div className={styles.heroRule}>
                 <span />
-                <i>Polish &amp; Pay</i>
+                <i>Polished &amp; Paid</i>
                 <span />
               </div>
             </div>
@@ -60,7 +60,7 @@ export default function AboutPage() {
           </div>
 
           <div className={styles.introCopy}>
-            <span className={styles.kicker}>THE POLISH &amp; PAY EDIT</span>
+            <span className={styles.kicker}>THE POLISHED &amp; PAID EDIT</span>
             <h2>
               Little luxuries.
               <br />
@@ -127,7 +127,7 @@ export default function AboutPage() {
         <section className={styles.cta}>
           <div className={styles.ctaOrb} />
           <div className={styles.ctaContent}>
-            <span className={styles.kicker}>POLISH &amp; PAY</span>
+            <span className={styles.kicker}>POLISHED &amp; PAID</span>
             <h2>
               Find your next
               <br />
