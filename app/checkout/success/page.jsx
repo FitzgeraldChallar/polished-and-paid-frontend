@@ -1,18 +1,23 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Header from "../../../components/storefront/Header";
 import Footer from "../../../components/storefront/Footer";
 import { Check, ArrowRight, Sparkles } from "lucide-react";
 
-export default async function CheckoutSuccessPage({ searchParams }) {
-  const params = await searchParams;
-  const order = params?.order || "";
+export default function CheckoutSuccessPage() {
+  const [orderNumber, setOrderNumber] = useState("");
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setOrderNumber(params.get("order") || "");
+  }, []);
 
   return (
     <>
       <Header />
       <main className="payment-result">
-        <div className="result-icon"><Check size={28}/></div>
+        <div className="result-icon"><Check size={28} /></div>
         <span>Payment confirmation</span>
         <h1>
           Thank you for
@@ -20,16 +25,17 @@ export default async function CheckoutSuccessPage({ searchParams }) {
           <em>shopping with us.</em>
         </h1>
         <p>
-          Your payment flow has returned successfully.
-          {order ? ` Order ${order} is associated with this checkout.` : ""}
+          You have returned from Stripe's secure checkout.
+          {orderNumber ? ` Order ${orderNumber} is associated with this checkout.` : ""}
+          {" "}Our verified payment webhook updates the order after Stripe confirms the payment. If your order status takes a moment to update, please do not place the order again.
         </p>
         <div className="result-note">
-          <Sparkles size={16}/>
-          <span>Your order status will be updated by the payment webhook.</span>
+          <Sparkles size={16} />
+          <span>Your order status is updated by the secure payment confirmation from Stripe.</span>
         </div>
         <div className="result-actions">
           <a href="/shop" className="store-button-dark">
-            Continue Shopping <ArrowRight size={16}/>
+            Continue Shopping <ArrowRight size={16} />
           </a>
           <a href="/account" className="store-button-light">
             My Account
@@ -52,5 +58,5 @@ const styles = `
 .result-note{display:flex;align-items:center;gap:8px;margin-top:16px;padding:12px 15px;background:#fff;color:#76676a;font:500 9px/1.4 "DM Sans",sans-serif}
 .result-note svg{color:#b86676}
 .result-actions{display:flex;gap:10px;margin-top:24px}
-@media(max-width:600px){.payment-result h1{font-size:47px}.result-actions{flex-direction:column;width:min(300px,100%)}}
+@media(max-width:600px){.payment-result h1{font-size:47px}.result-actions{flex-direction:column;width:min(300px,100%)}.result-actions>*{width:100%}}
 `;
