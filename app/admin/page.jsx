@@ -36,6 +36,7 @@ import {
   clearAdminToken,
   getAdminToken,
   mediaUrl,
+  setAdminToken,
 } from "../../lib/adminApi";
 
 const nav = [
@@ -2195,23 +2196,78 @@ function Payments({ payments }) {
 }
 
 function SettingsPanel({ user }) {
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [savingPassword, setSavingPassword] = useState(false);
+  const [passwordError, setPasswordError] = useState("");
+  const [passwordSuccess, setPasswordSuccess] = useState("");
+
+  async function handlePasswordChange(event) {
+    event.preventDefault();
+    setPasswordError("");
+    setPasswordSuccess("");
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError("The new passwords do not match.");
+      return;
+    }
+    if (newPassword.length < 8) {
+      setPasswordError("Your new password must contain at least 8 characters.");
+      return;
+    }
+
+    setSavingPassword(true);
+    try {
+      const result = await adminApi.changePassword({
+        current_password: currentPassword,
+        new_password: newPassword,
+        confirm_password: confirmPassword,
+      });
+      if (result?.token) {
+        // The backend rotates the token after a successful password change.
+        setAdminToken(result.token);
+      }
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      setPasswordSuccess(result?.detail || "Your password has been changed successfully.");
+    } catch (error) {
+      const details = error?.data;
+      const firstFieldError = details && typeof details === "object"
+        ? Object.entries(details).map(([key, value]) => {
+            const messages = Array.isArray(value) ? value.join(" ") : String(value || "");
+            return key === "current_password" ? messages : messages;
+          }).filter(Boolean).join(" ")
+        : "";
+      setPasswordError(firstFieldError || error.message || "We couldn't change your password. Please try again.");
+    } finally {
+      setSavingPassword(false);
+    }
+  }
+
+  const fieldStyle = {
+    display: "block",
+    width: "100%",
+    boxSizing: "border-box",
+    border: "1px solid #e8dcda",
+    borderRadius: 8,
+    background: "#fff",
+    color: "#211a1c",
+    padding: "13px 14px",
+    font: '500 13px "DM Sans", sans-serif',
+    outlineColor: "#b86676",
+  };
+
   return (
     <div className="pp-page">
       <div className="panel settings-panel">
-        <span className="eyebrow">
-          Administrator
-        </span>
-
-        <h2>
-          {user?.first_name ||
-            "Store administrator"}
-        </h2>
-
+        <span className="eyebrow">Administrator</span>
+        <h2>{user?.first_name || "Store administrator"}</h2>
         <p>{user?.email}</p>
 
         <div className="settings-note">
           <Settings size={18} />
-
           <div>
             <b>Store settings</b>
             <span>
@@ -2221,6 +2277,53 @@ function SettingsPanel({ user }) {
             </span>
           </div>
         </div>
+      </div>
+
+      <div className="panel" style={{ marginTop: 22, padding: "30px 36px" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 14, marginBottom: 24 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 10, display: "grid", placeItems: "center", background: "#fbefef", color: "#a95f6b", flexShrink: 0 }}>
+            <Settings size={20} />
+          </div>
+          <div>
+            <span className="eyebrow">Account security</span>
+            <h3 style={{ margin: "5px 0 6px", font: '500 24px/1.2 "Playfair Display", serif' }}>Change password</h3>
+            <p style={{ margin: 0, color: "#817579", fontSize: 13, lineHeight: 1.7 }}>
+              Update your administrator password to keep your store account secure.
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={handlePasswordChange} style={{ maxWidth: 560, display: "grid", gap: 17 }}>
+          <label style={{ display: "grid", gap: 8, color: "#493d40", fontSize: 12, fontWeight: 700 }}>
+            Current password
+            <input autoComplete="current-password" type="password" required value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} style={fieldStyle} placeholder="Enter your current password" />
+          </label>
+          <label style={{ display: "grid", gap: 8, color: "#493d40", fontSize: 12, fontWeight: 700 }}>
+            New password
+            <input autoComplete="new-password" type="password" required minLength={8} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} style={fieldStyle} placeholder="Create a strong new password" />
+          </label>
+          <label style={{ display: "grid", gap: 8, color: "#493d40", fontSize: 12, fontWeight: 700 }}>
+            Confirm new password
+            <input autoComplete="new-password" type="password" required minLength={8} value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} style={fieldStyle} placeholder="Enter your new password again" />
+          </label>
+
+          {passwordError && (
+            <div role="alert" style={{ border: "1px solid #f0c9c9", background: "#fff4f3", color: "#9b3030", borderRadius: 8, padding: "12px 14px", fontSize: 12, lineHeight: 1.6 }}>
+              {passwordError}
+            </div>
+          )}
+          {passwordSuccess && (
+            <div role="status" style={{ border: "1px solid #cce5d5", background: "#f2fbf5", color: "#286b43", borderRadius: 8, padding: "12px 14px", fontSize: 12, lineHeight: 1.6 }}>
+              {passwordSuccess}
+            </div>
+          )}
+
+          <div style={{ paddingTop: 4 }}>
+            <button type="submit" disabled={savingPassword} style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", gap: 9, minHeight: 44, padding: "0 20px", border: 0, borderRadius: 7, background: savingPassword ? "#bda7aa" : "#211a1c", color: "#fff", font: '700 12px "DM Sans", sans-serif', cursor: savingPassword ? "wait" : "pointer", opacity: savingPassword ? 0.8 : 1 }}>
+              {savingPassword ? "Updating password…" : "Update password"}
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   );
