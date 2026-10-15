@@ -1,26 +1,10 @@
-/* ================================================================
-   POLISH & PAY — GLOBAL PAGE LOADER
-   ----------------------------------------------------------------
-   Mount this component once in app/layout.jsx.
-
-   It handles:
-   - Internal Next.js <Link> navigation
-   - Normal internal <a> navigation
-   - Browser back / forward navigation
-   - Programmatic navigation through the custom events below
-   - A graceful fallback timeout so the loader can never remain stuck
-   - Reduced-motion accessibility
-   - External links, downloads, mailto/tel, new tabs, and modifier
-     clicks are intentionally ignored
-================================================================ */
-
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 
 const LOADER_TIMEOUT = 5000;
-const MINIMUM_DISPLAY_TIME = 280;
+const MINIMUM_DISPLAY_TIME = 220;
 
 function isModifiedClick(event) {
   return (
@@ -33,64 +17,48 @@ function isModifiedClick(event) {
 }
 
 function isInternalNavigation(anchor) {
-  if (!anchor) {
-    return false;
-  }
+  if (!anchor) return false;
 
   const href = anchor.getAttribute("href");
 
-  if (!href) {
-    return false;
-  }
-
   if (
+    !href ||
     href.startsWith("#") ||
     href.startsWith("mailto:") ||
     href.startsWith("tel:") ||
-    href.startsWith("javascript:")
+    href.startsWith("javascript:") ||
+    anchor.hasAttribute("download") ||
+    (anchor.target && anchor.target !== "_self")
   ) {
     return false;
   }
 
-  if (anchor.hasAttribute("download")) {
-    return false;
-  }
-
-  if (anchor.target && anchor.target !== "_self") {
-    return false;
-  }
-
   try {
-    const destination = new URL(
-      href,
+    return (
+      new URL(href, window.location.origin).origin ===
       window.location.origin
     );
-
-    return destination.origin === window.location.origin;
   } catch {
     return false;
   }
 }
 
 function getNavigationAnchor(target) {
-  if (!(target instanceof Element)) {
-    return null;
-  }
-
+  if (!(target instanceof Element)) return null;
   return target.closest("a[href]");
 }
 
 export default function GlobalPageLoader() {
   const pathname = usePathname();
-
   const [loading, setLoading] = useState(false);
 
   const startedAtRef = useRef(0);
   const timeoutRef = useRef(null);
   const finishTimeoutRef = useRef(null);
   const previousPathnameRef = useRef(pathname);
+  const loadingRef = useRef(false);
 
-  function clearTimers() {
+  const clearTimers = useCallback(() => {
     if (timeoutRef.current) {
       window.clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
@@ -100,89 +68,80 @@ export default function GlobalPageLoader() {
       window.clearTimeout(finishTimeoutRef.current);
       finishTimeoutRef.current = null;
     }
-  }
+  }, []);
 
-  function stopLoading(immediate = false) {
-    clearTimers();
+  const stopLoading = useCallback(
+    (immediate = false) => {
+      clearTimers();
 
-    if (immediate) {
-      setLoading(false);
-      return;
-    }
+      if (immediate) {
+        loadingRef.current = false;
+        setLoading(false);
+        return;
+      }
 
-    const elapsed =
-      Date.now() - startedAtRef.current;
+      const elapsed = Date.now() - startedAtRef.current;
+      const remaining = Math.max(
+        0,
+        MINIMUM_DISPLAY_TIME - elapsed
+      );
 
-    const remaining = Math.max(
-      0,
-      MINIMUM_DISPLAY_TIME - elapsed
-    );
+      if (remaining === 0) {
+        loadingRef.current = false;
+        setLoading(false);
+        return;
+      }
 
-    if (remaining === 0) {
-      setLoading(false);
-      return;
-    }
-
-    finishTimeoutRef.current =
-      window.setTimeout(() => {
+      finishTimeoutRef.current = window.setTimeout(() => {
+        loadingRef.current = false;
         setLoading(false);
         finishTimeoutRef.current = null;
       }, remaining);
-  }
+    },
+    [clearTimers]
+  );
 
-  function startLoading() {
+  const startLoading = useCallback(() => {
     clearTimers();
 
     startedAtRef.current = Date.now();
-
+    loadingRef.current = true;
     setLoading(true);
 
-    timeoutRef.current =
-      window.setTimeout(() => {
-        setLoading(false);
-        timeoutRef.current = null;
-      }, LOADER_TIMEOUT);
-  }
+    timeoutRef.current = window.setTimeout(() => {
+      loadingRef.current = false;
+      setLoading(false);
+      timeoutRef.current = null;
+    }, LOADER_TIMEOUT);
+  }, [clearTimers]);
 
   useEffect(() => {
-    const handleDocumentPointerDown = (event) => {
-      if (isModifiedClick(event)) {
-        return;
-      }
+    /*
+     * Listen for completed clicks rather than pointerdown.
+     * This avoids starting the loader when users swipe or scroll
+     * on mobile without actually activating a link.
+     */
+    const handleDocumentClick = (event) => {
+      if (isModifiedClick(event)) return;
 
-      const anchor = getNavigationAnchor(
-        event.target
-      );
+      const anchor = getNavigationAnchor(event.target);
 
-      if (!isInternalNavigation(anchor)) {
-        return;
-      }
+      if (!isInternalNavigation(anchor)) return;
 
-      const href =
-        anchor.getAttribute("href");
-
-      if (!href) {
-        return;
-      }
+      const href = anchor.getAttribute("href");
+      if (!href) return;
 
       try {
         const destination = new URL(
           href,
           window.location.origin
         );
+        const current = new URL(window.location.href);
 
-        const current = new URL(
-          window.location.href
-        );
-
-        /*
-         * Do not show the full-page loader when the
-         * user clicks the exact page they are already on.
-         */
+        // Ignore same-page and hash-only navigation.
         if (
           destination.pathname === current.pathname &&
-          destination.search === current.search &&
-          destination.hash === current.hash
+          destination.search === current.search
         ) {
           return;
         }
@@ -193,38 +152,16 @@ export default function GlobalPageLoader() {
       }
     };
 
-    const handlePopState = () => {
-      startLoading();
-    };
+    const handlePopState = () => startLoading();
+    const handleManualStart = () => startLoading();
+    const handleManualStop = () => stopLoading();
 
-    const handleManualStart = () => {
-      startLoading();
-    };
-
-    const handleManualStop = () => {
-      stopLoading();
-    };
-
-    /*
-     * Capture phase means this fires before Next.js
-     * receives the click and starts its navigation.
-     */
-    document.addEventListener(
-      "pointerdown",
-      handleDocumentPointerDown,
-      true
-    );
-
-    window.addEventListener(
-      "popstate",
-      handlePopState
-    );
-
+    document.addEventListener("click", handleDocumentClick);
+    window.addEventListener("popstate", handlePopState);
     window.addEventListener(
       "polishpay:loading:start",
       handleManualStart
     );
-
     window.addEventListener(
       "polishpay:loading:stop",
       handleManualStop
@@ -232,21 +169,14 @@ export default function GlobalPageLoader() {
 
     return () => {
       document.removeEventListener(
-        "pointerdown",
-        handleDocumentPointerDown,
-        true
+        "click",
+        handleDocumentClick
       );
-
-      window.removeEventListener(
-        "popstate",
-        handlePopState
-      );
-
+      window.removeEventListener("popstate", handlePopState);
       window.removeEventListener(
         "polishpay:loading:start",
         handleManualStart
       );
-
       window.removeEventListener(
         "polishpay:loading:stop",
         handleManualStop
@@ -254,25 +184,18 @@ export default function GlobalPageLoader() {
 
       clearTimers();
     };
-  }, []);
+  }, [startLoading, stopLoading, clearTimers]);
 
-  /*
-   * When Next.js completes a pathname change, gracefully
-   * remove the global navigation loader.
-   */
   useEffect(() => {
-    if (
-      previousPathnameRef.current !== pathname
-    ) {
+    if (previousPathnameRef.current !== pathname) {
       previousPathnameRef.current = pathname;
-      stopLoading();
-    }
-  }, [pathname]);
 
-  /*
-   * Public escape hatch for API actions or components
-   * that need to participate in the global loading state.
-   */
+      if (loadingRef.current) {
+        stopLoading();
+      }
+    }
+  }, [pathname, stopLoading]);
+
   useEffect(() => {
     window.polishPayLoading = {
       start: startLoading,
@@ -282,50 +205,41 @@ export default function GlobalPageLoader() {
     return () => {
       delete window.polishPayLoading;
     };
-  }, []);
+  }, [startLoading, stopLoading]);
 
-  if (!loading) {
-    return null;
-  }
+  useEffect(() => {
+    return () => clearTimers();
+  }, [clearTimers]);
+
+  if (!loading) return null;
 
   return (
     <div
       className="pp-global-loader"
       role="status"
       aria-live="polite"
-      aria-label="Loading"
+      aria-label="Loading page"
     >
-      <div
-        className="pp-global-loader-backdrop"
-      />
+      <div className="pp-global-loader-backdrop" />
 
-      <div
-        className="pp-global-loader-card"
-      >
+      <div className="pp-loader-content">
         <div
-          className="pp-global-loader-mark"
+          className="pp-loader-spinner"
           aria-hidden="true"
         >
-          <span />
-          <span />
-          <span />
+          <span className="pp-spinner-halo" />
+          <span className="pp-spinner-track" />
+          <span className="pp-spinner-ring" />
+          <span className="pp-spinner-highlight" />
+          <span className="pp-spinner-core" />
         </div>
 
-        <div
-          className="pp-global-loader-brand"
-        >
-          POLISH <i>&amp;</i> PAID
-        </div>
+        <p className="pp-loader-brand">
+          POLISHED <span>&amp;</span> PAID
+        </p>
 
-        <div
-          className="pp-global-loader-line"
-          aria-hidden="true"
-        >
-          <span />
-        </div>
-
-        <p>
-          Preparing something beautiful…
+        <p className="pp-loader-caption">
+          A little moment of beauty
         </p>
       </div>
 
@@ -343,212 +257,194 @@ export default function GlobalPageLoader() {
         .pp-global-loader-backdrop {
           position: absolute;
           inset: 0;
-          background:
-            rgba(255, 250, 248, 0.72);
-          backdrop-filter: blur(7px);
-          -webkit-backdrop-filter: blur(7px);
-          animation:
-            ppLoaderFadeIn 180ms ease both;
+          background: rgba(255, 250, 249, 0.72);
+          backdrop-filter: blur(4px);
+          -webkit-backdrop-filter: blur(4px);
+          animation: ppLoaderFade 180ms ease-out both;
         }
 
-        .pp-global-loader-card {
+        /* Transparent wrapper: no card, box, border or shadow. */
+        .pp-loader-content {
           position: relative;
-          z-index: 1;
           display: flex;
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          width: min(270px, calc(100vw - 48px));
-          min-height: 190px;
-          padding: 30px 28px;
-          border: 1px solid
-            rgba(184, 102, 118, 0.16);
-          border-radius: 18px;
-          background:
-            rgba(255, 253, 252, 0.96);
-          box-shadow:
-            0 28px 80px
-            rgba(53, 31, 35, 0.15),
-            0 8px 25px
-            rgba(184, 102, 118, 0.08);
-          animation:
-            ppLoaderCardIn 260ms
-            cubic-bezier(.22,.61,.36,1)
-            both;
+          padding: 0;
+          border: 0;
+          border-radius: 0;
+          background: transparent;
+          box-shadow: none;
+          animation: ppLoaderEnter 240ms
+            cubic-bezier(0.2, 0.7, 0.25, 1) both;
         }
 
-        .pp-global-loader-mark {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 5px;
-          height: 28px;
-          margin-bottom: 16px;
+        .pp-loader-spinner {
+          position: relative;
+          display: grid;
+          place-items: center;
+          width: 76px;
+          height: 76px;
+          margin-bottom: 23px;
+          isolation: isolate;
         }
 
-        .pp-global-loader-mark span {
-          display: block;
-          width: 5px;
-          height: 5px;
+        .pp-spinner-halo {
+          position: absolute;
+          inset: 8px;
           border-radius: 50%;
-          background: #c87885;
-          animation:
-            ppLoaderDot 900ms
-            ease-in-out infinite;
+          background: rgba(215, 157, 159, 0.13);
+          filter: blur(8px);
+          animation: ppSpinnerPulse 1.8s ease-in-out infinite;
         }
 
-        .pp-global-loader-mark span:nth-child(2) {
-          animation-delay: 120ms;
+        .pp-spinner-track,
+        .pp-spinner-ring,
+        .pp-spinner-highlight {
+          position: absolute;
+          border-radius: 50%;
         }
 
-        .pp-global-loader-mark span:nth-child(3) {
-          animation-delay: 240ms;
+        .pp-spinner-track {
+          inset: 7px;
+          border: 2px solid #f0dfdc;
         }
 
-        .pp-global-loader-brand {
-          color: #2c2426;
-          font-family:
-            "DM Sans",
-            sans-serif;
-          font-size: 12px;
+        .pp-spinner-ring {
+          inset: 7px;
+          border: 2.5px solid transparent;
+          border-top-color: #bd7c86;
+          border-right-color: #d69ca0;
+          border-bottom-color: #e8c2bc;
+          animation: ppSpinnerRotate 1.05s
+            cubic-bezier(0.55, 0.15, 0.35, 0.85) infinite;
+        }
+
+        .pp-spinner-highlight {
+          inset: 14px;
+          border: 1px solid rgba(211, 166, 154, 0.52);
+          border-left-color: transparent;
+          border-bottom-color: transparent;
+          animation: ppSpinnerRotateReverse 1.7s linear infinite;
+        }
+
+        .pp-spinner-core {
+          position: relative;
+          width: 10px;
+          height: 10px;
+          border-radius: 50%;
+          background: linear-gradient(
+            135deg,
+            #f0c9c2 0%,
+            #d49ba0 48%,
+            #b97883 100%
+          );
+          box-shadow:
+            0 0 0 5px rgba(201, 140, 146, 0.1),
+            0 0 16px rgba(201, 140, 146, 0.22);
+          animation: ppCoreBreathe 1.8s ease-in-out infinite;
+        }
+
+        .pp-loader-brand {
+          margin: 0;
+          color: #302426;
+          font-family: "DM Sans", Arial, sans-serif;
+          font-size: 11px;
           font-weight: 800;
-          line-height: 1;
-          letter-spacing: 0.18em;
+          line-height: 1.5;
+          letter-spacing: 0.2em;
         }
 
-        .pp-global-loader-brand i {
-          color: #c87885;
-          font-family:
-            "Playfair Display",
-            Georgia,
-            serif;
-          font-size: 15px;
+        .pp-loader-brand span {
+          color: #c98c92;
+          font-family: "Playfair Display", Georgia, serif;
+          font-size: 16px;
           font-weight: 500;
           letter-spacing: 0;
         }
 
-        .pp-global-loader-line {
-          position: relative;
-          width: 78px;
-          height: 1px;
-          margin-top: 15px;
-          overflow: hidden;
-          background:
-            rgba(184, 102, 118, 0.14);
+        .pp-loader-caption {
+          margin: 7px 0 0;
+          color: #9b8588;
+          font-family: "DM Sans", Arial, sans-serif;
+          font-size: 10px;
+          font-weight: 400;
+          line-height: 1.5;
+          letter-spacing: 0.035em;
         }
 
-        .pp-global-loader-line span {
-          position: absolute;
-          top: 0;
-          left: -35%;
-          width: 35%;
-          height: 100%;
-          background: #c87885;
-          animation:
-            ppLoaderLine 900ms
-            ease-in-out infinite;
+        @keyframes ppSpinnerRotate {
+          to {
+            transform: rotate(360deg);
+          }
         }
 
-        .pp-global-loader-card p {
-          margin: 14px 0 0;
-          color: #8b797d;
-          font-family:
-            "DM Sans",
-            sans-serif;
-          font-size: 8px;
-          font-weight: 600;
-          line-height: 1;
-          letter-spacing: 0.16em;
-          text-transform: uppercase;
+        @keyframes ppSpinnerRotateReverse {
+          to {
+            transform: rotate(-360deg);
+          }
         }
 
-        @keyframes ppLoaderFadeIn {
+        @keyframes ppSpinnerPulse {
+          0%, 100% {
+            opacity: 0.45;
+            transform: scale(0.88);
+          }
+          50% {
+            opacity: 0.9;
+            transform: scale(1.08);
+          }
+        }
+
+        @keyframes ppCoreBreathe {
+          0%, 100% {
+            transform: scale(0.9);
+          }
+          50% {
+            transform: scale(1.12);
+          }
+        }
+
+        @keyframes ppLoaderFade {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+
+        @keyframes ppLoaderEnter {
           from {
             opacity: 0;
+            transform: translateY(5px) scale(0.985);
           }
-
           to {
             opacity: 1;
-          }
-        }
-
-        @keyframes ppLoaderCardIn {
-          from {
-            opacity: 0;
-            transform:
-              translateY(8px)
-              scale(0.97);
-          }
-
-          to {
-            opacity: 1;
-            transform:
-              translateY(0)
-              scale(1);
-          }
-        }
-
-        @keyframes ppLoaderDot {
-          0%,
-          100% {
-            opacity: 0.28;
-            transform: scale(0.75);
-          }
-
-          50% {
-            opacity: 1;
-            transform: scale(1.2);
-          }
-        }
-
-        @keyframes ppLoaderLine {
-          0% {
-            left: -35%;
-          }
-
-          50% {
-            left: 100%;
-          }
-
-          100% {
-            left: 100%;
+            transform: translateY(0) scale(1);
           }
         }
 
         @media (max-width: 520px) {
-          .pp-global-loader-card {
-            width: min(
-              240px,
-              calc(100vw - 40px)
-            );
-            min-height: 175px;
-            padding: 26px 22px;
+          .pp-loader-spinner {
+            width: 68px;
+            height: 68px;
+            margin-bottom: 20px;
           }
 
-          .pp-global-loader-brand {
+          .pp-loader-brand {
             font-size: 10px;
           }
 
-          .pp-global-loader-card p {
-            font-size: 7px;
+          .pp-loader-caption {
+            font-size: 10px;
           }
         }
 
         @media (prefers-reduced-motion: reduce) {
           .pp-global-loader-backdrop,
-          .pp-global-loader-card,
-          .pp-global-loader-mark span,
-          .pp-global-loader-line span {
+          .pp-loader-content,
+          .pp-spinner-ring,
+          .pp-spinner-highlight,
+          .pp-spinner-halo,
+          .pp-spinner-core {
             animation: none;
-          }
-
-          .pp-global-loader-backdrop {
-            opacity: 1;
-          }
-
-          .pp-global-loader-card {
-            opacity: 1;
-            transform: none;
           }
         }
       `}</style>
