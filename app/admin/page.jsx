@@ -290,14 +290,17 @@ export default function AdminPage() {
 
   async function saveCategory(form) {
     try {
-      const payload = {
-        name: form.name,
-        description: form.description,
-        image_url: form.image_url,
-        icon: form.icon,
-        is_active: form.is_active,
-        sort_order: Number(form.sort_order || 0),
-      };
+      const payload = new FormData();
+      payload.append("name", form.name);
+      payload.append("description", form.description || "");
+      payload.append("icon", form.icon || "");
+      payload.append("is_active", form.is_active ? "true" : "false");
+      payload.append("sort_order", String(Number(form.sort_order || 0)));
+      // Keep the legacy URL field empty for newly uploaded/updated categories.
+      payload.append("image_url", "");
+      if (form.image instanceof File) {
+        payload.append("image", form.image);
+      }
 
       if (form.id) {
         await adminApi.updateCategory(form.id, payload);
@@ -2597,48 +2600,36 @@ function CategoryModal({
 }) {
   const [form, setForm] = useState({
     name: item?.name || "",
-    description:
-      item?.description || "",
-    image_url:
-      item?.image_url || "",
+    description: item?.description || "",
+    image: null,
     icon: item?.icon || "✦",
-    sort_order:
-      item?.sort_order || 0,
-    is_active:
-      item?.is_active ?? true,
+    sort_order: item?.sort_order || 0,
+    is_active: item?.is_active ?? true,
   });
+  const [preview, setPreview] = useState(item?.image || item?.image_url || "");
 
-  const set = (k, v) =>
-    setForm((f) => ({
-      ...f,
-      [k]: v,
-    }));
+  const set = (key, value) => setForm((current) => ({ ...current, [key]: value }));
+
+  useEffect(() => {
+    if (!form.image) return undefined;
+    const objectUrl = URL.createObjectURL(form.image);
+    setPreview(objectUrl);
+    return () => URL.revokeObjectURL(objectUrl);
+  }, [form.image]);
 
   return (
-    <Modal
-      title={
-        item
-          ? "Edit category"
-          : "Add category"
-      }
-      onClose={onClose}
-    >
+    <Modal title={item ? "Edit category" : "Add category"} onClose={onClose}>
       <form
         className="modal-form"
-        onSubmit={(e) => {
-          e.preventDefault();
-          onSave({
-            ...form,
-            id: item?.id,
-          });
+        onSubmit={(event) => {
+          event.preventDefault();
+          onSave({ ...form, id: item?.id });
         }}
       >
         <Field
           label="Category name"
           value={form.name}
-          onChange={(v) =>
-            set("name", v)
-          }
+          onChange={(value) => set("name", value)}
           required
         />
 
@@ -2647,72 +2638,59 @@ function CategoryModal({
           <textarea
             rows="4"
             value={form.description}
-            onChange={(e) =>
-              set(
-                "description",
-                e.target.value
-              )
-            }
+            onChange={(event) => set("description", event.target.value)}
           />
         </label>
 
         <div className="form-grid">
-          <Field
-            label="Icon"
-            value={form.icon}
-            onChange={(v) =>
-              set("icon", v)
-            }
-          />
-
+          <Field label="Icon" value={form.icon} onChange={(value) => set("icon", value)} />
           <Field
             label="Sort order"
             type="number"
             value={form.sort_order}
-            onChange={(v) =>
-              set("sort_order", v)
-            }
+            onChange={(value) => set("sort_order", value)}
           />
         </div>
 
-        <Field
-          label="Image URL"
-          value={form.image_url}
-          onChange={(v) =>
-            set("image_url", v)
-          }
-        />
+        <label>
+          Category image
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(event) => set("image", event.target.files?.[0] || null)}
+          />
+          <span className="field-hint">
+            Upload an image file. Wide, high-quality product or category photography works best.
+          </span>
+        </label>
+
+        {preview ? (
+          <div className="category-image-preview">
+            <img src={preview} alt="Category image preview" />
+            <span>{form.image ? form.image.name : "Current category image"}</span>
+          </div>
+        ) : null}
 
         <label className="check">
           <input
             type="checkbox"
             checked={form.is_active}
-            onChange={(e) =>
-              set(
-                "is_active",
-                e.target.checked
-              )
-            }
+            onChange={(event) => set("is_active", event.target.checked)}
           />
           <span>Active</span>
         </label>
 
         <div className="modal-actions">
-          <button
-            type="button"
-            className="secondary"
-            onClick={onClose}
-          >
-            Cancel
-          </button>
-
-          <button className="primary">
-            {item
-              ? "Save changes"
-              : "Create category"}
-          </button>
+          <button type="button" className="secondary" onClick={onClose}>Cancel</button>
+          <button className="primary">{item ? "Save changes" : "Create category"}</button>
         </div>
       </form>
+      <style jsx>{`
+        .field-hint { display:block; margin-top:6px; color:#8b7778; font-size:11px; line-height:1.5; }
+        .category-image-preview { display:flex; align-items:center; gap:12px; padding:10px; border:1px solid #eadbd8; background:#fffaf8; }
+        .category-image-preview img { width:76px; height:76px; object-fit:cover; border-radius:4px; }
+        .category-image-preview span { min-width:0; color:#6f5d5f; font-size:11px; overflow-wrap:anywhere; }
+      `}</style>
     </Modal>
   );
 }
